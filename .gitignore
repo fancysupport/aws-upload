@@ -1,0 +1,3 @@
+*.sublime*
+codes.json
+node_modules/

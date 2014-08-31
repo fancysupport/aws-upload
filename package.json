@@ -1,0 +1,23 @@
+{
+  "name": "aws-upload",
+  "version": "0.0.0",
+  "description": "script to upload to s3 and invalidate file on cloudfront",
+  "main": "upload.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fancysupport/aws-upload"
+  },
+  "author": "niftykins",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fancysupport/aws-upload/issues"
+  },
+  "homepage": "https://github.com/fancysupport/aws-upload",
+  "dependencies": {
+    "minimist": "~1.1.0",
+    "aws-sdk": "~2.0.15"
+  }
+}
