@@ -56,7 +56,7 @@ if (argv.src) {
 
 			}, function(err, data) {
 				if (err) return console.log(err);
-				console.log(argv.src + ' uploaded to ' + path.join('/', codes.bucket, argv.dest));
+				console.log(argv.src + ' uploaded to ' + '/'+codes.bucket+'/'+argv.dest);
 
 				if (argv.ref) invalidate();
 		});
