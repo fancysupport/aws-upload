@@ -1,6 +1,5 @@
 var AWS = require('aws-sdk');
 var fs = require('fs');
-var path = require('path');
 var zlib = require('zlib');
 var argv = require('minimist')(process.argv.slice(2));
 
@@ -33,7 +32,7 @@ var invalidate = function() {
 			CallerReference: argv.ref,
 			Paths: {
 				Quantity: 1,
-				Items: [path.join('/', codes.bucket, argv.dest)]
+				Items: ['/'+codes.bucket+'/'+argv.dest]
 			}
 		}
 	}, function(err, data) {
@@ -53,6 +52,7 @@ if (argv.src) {
 			Key: argv.dest,
 			Body: result,
 			ContentEncoding: 'gzip',
+			ContentType: 'application/javascript',
 
 			}, function(err, data) {
 				if (err) return console.log(err);
