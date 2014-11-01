@@ -29,7 +29,7 @@ var invalidate = function() {
 	cf.createInvalidation({
 		DistributionId: codes.dist_id,
 		InvalidationBatch: {
-			CallerReference: argv.ref,
+			CallerReference: argv.ref + Date.now(),
 			Paths: {
 				Quantity: 1,
 				Items: ['/'+codes.bucket+'/'+argv.dest]
