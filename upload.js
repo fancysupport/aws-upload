@@ -5,6 +5,25 @@ var argv = require('minimist')(process.argv.slice(2));
 
 var codes = JSON.parse(fs.readFileSync(argv.codes));
 
+var content_types = {
+	'css': 'text/css',
+	'gif': 'image/gif',
+	'html': 'text/html',
+	'ico': 'image/vnd.microsoft.icon',
+	'jpeg': 'image/jpeg',
+	'jpg': 'image/jpeg',
+	'js': 'application/javascript',
+	'json': 'application/json',
+	'png': 'image/png'
+};
+
+function get_content_type(name) {
+	var i = name.lastIndexOf('.');
+	var ext = (i < 0) ? '' : name.substr(i);
+
+	return content_types[ext.toLowerCase()] || 'application/octet-stream';
+}
+
 /*
 	--codes=/path/to/codes.json
 	--ref=cloudfrontCalleeReference  //triggers invalidation code
@@ -48,11 +67,12 @@ if (argv.src) {
 
 		var s3 = new AWS.S3({accessKeyId: codes.s3_key, secretAccessKey: codes.s3_secret});
 			s3.putObject({
-			Bucket: codes.bucket,
-			Key: argv.dest,
-			Body: result,
-			ContentEncoding: 'gzip',
-			ContentType: 'application/javascript',
+				ACL: 'public-read-write',
+				Bucket: codes.bucket,
+				Key: argv.dest,
+				Body: result,
+				ContentEncoding: 'gzip',
+				ContentType: get_content_type(argv.src),
 
 			}, function(err, data) {
 				if (err) return console.log(err);
@@ -62,3 +82,5 @@ if (argv.src) {
 		});
 	});
 } else if (argv.ref) invalidate();
+
+//$ node upload.js --codes=codes.json --dest=client.js --src=build/client.js --ref=pancakes
