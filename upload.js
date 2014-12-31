@@ -18,7 +18,7 @@ var content_types = {
 };
 
 function get_content_type(name) {
-	var i = name.lastIndexOf('.');
+	var i = name.lastIndexOf('.') + 1;
 	var ext = (i < 0) ? '' : name.substr(i);
 
 	return content_types[ext.toLowerCase()] || 'application/octet-stream';
@@ -51,7 +51,7 @@ var invalidate = function() {
 			CallerReference: argv.ref + Date.now(),
 			Paths: {
 				Quantity: 1,
-				Items: ['/'+codes.bucket+'/'+argv.dest]
+				Items: ['/'+argv.ref]
 			}
 		}
 	}, function(err, data) {
@@ -66,19 +66,19 @@ if (argv.src) {
 		if (err) return console.log(err);
 
 		var s3 = new AWS.S3({accessKeyId: codes.s3_key, secretAccessKey: codes.s3_secret});
-			s3.putObject({
-				ACL: 'public-read-write',
-				Bucket: codes.bucket,
-				Key: argv.dest,
-				Body: result,
-				ContentEncoding: 'gzip',
-				ContentType: get_content_type(argv.src),
+		s3.putObject({
+			ACL: 'public-read-write',
+			Bucket: codes.bucket,
+			Key: argv.dest,
+			Body: result,
+			ContentEncoding: 'gzip',
+			ContentType: get_content_type(argv.src),
 
-			}, function(err, data) {
-				if (err) return console.log(err);
-				console.log(argv.src + ' uploaded to ' + '/'+codes.bucket+'/'+argv.dest);
+		}, function(err, data) {
+			if (err) return console.log(err);
+			console.log(argv.src + ' uploaded to ' + '/'+codes.bucket+'/'+argv.dest);
 
-				if (argv.ref) invalidate();
+			if (argv.ref) invalidate();
 		});
 	});
 } else if (argv.ref) invalidate();
