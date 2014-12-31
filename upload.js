@@ -26,7 +26,7 @@ function get_content_type(name) {
 
 /*
 	--codes=/path/to/codes.json
-	--ref=cloudfrontCalleeReference  //triggers invalidation code
+	--ref=path/to/invalidate.js  //triggers invalidation code
 	--src=path/to/source.js //triggers upload code
 	--dest=path/to/dest.js
 */
@@ -40,8 +40,6 @@ function get_content_type(name) {
 	dist_id
 	bucket: noslashes
 */
-
-//$ node upload.js --codes=codes.json --dest=client.js --src=build/client.js --ref=pancakes
 
 var invalidate = function() {
 	var cf = new AWS.CloudFront({accessKeyId: codes.cf_key, secretAccessKey: codes.cf_secret});
@@ -83,4 +81,4 @@ if (argv.src) {
 	});
 } else if (argv.ref) invalidate();
 
-//$ node upload.js --codes=codes.json --dest=client.js --src=build/client.js --ref=pancakes
+//$ node upload.js --codes=codes.json --dest=client.js --src=build/client.js --ref=client.js
