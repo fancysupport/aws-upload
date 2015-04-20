@@ -24,24 +24,7 @@ function get_content_type(name) {
 	return content_types[ext.toLowerCase()] || 'application/octet-stream';
 }
 
-/*
-	--codes=/path/to/codes.json
-	--ref=path/to/invalidate.js  //triggers invalidation code
-	--src=path/to/source.js //triggers upload code
-	--dest=path/to/dest.js
-*/
-
-/*
-	codes.json
-	s3_key
-	s3_secret
-	cf_key
-	cf_secret
-	dist_id
-	bucket: noslashes
-*/
-
-var invalidate = function() {
+function invalidate() {
 	var cf = new AWS.CloudFront({accessKeyId: codes.cf_key, secretAccessKey: codes.cf_secret});
 	cf.createInvalidation({
 		DistributionId: codes.dist_id,
@@ -56,29 +39,43 @@ var invalidate = function() {
 		if (err) return console.log(err);
 		console.log(data.Id, data.Status, data.InvalidationBatch.CallerReference, data.InvalidationBatch.Paths.Items);
 	});
-};
+}
+
+function upload(data, content_type, zipped) {
+	var s3 = new AWS.S3({accessKeyId: codes.s3_key, secretAccessKey: codes.s3_secret});
+
+	var opts = {
+		ACL: 'public-read-write',
+		Bucket: codes.bucket,
+		Key: argv.dest,
+		Body: data,
+		ContentType: content_type
+	};
+	if (zipped) opts.ContentEncoding = 'gzip';
+
+	s3.putObject(opts, function(err, data) {
+		if (err) return console.log(err);
+		console.log(argv.src + (zipped ? ' zipped and ' : '') + ' uploaded to ' + '/'+codes.bucket+'/'+argv.dest);
+
+		if (argv.ref) invalidate();
+	});
+}
 
 if (argv.src) {
 	var file = fs.readFileSync(argv.src);
-	zlib.gzip(file, function(err, result) {
-		if (err) return console.log(err);
 
-		var s3 = new AWS.S3({accessKeyId: codes.s3_key, secretAccessKey: codes.s3_secret});
-		s3.putObject({
-			ACL: 'public-read-write',
-			Bucket: codes.bucket,
-			Key: argv.dest,
-			Body: result,
-			ContentEncoding: 'gzip',
-			ContentType: get_content_type(argv.src),
+	var content_type = get_content_type(argv.src);
 
-		}, function(err, data) {
+	// should only gzip non images
+	if (content_type.indexOf('image/') !== 0) {
+		zlib.gzip(file, function(err, result) {
 			if (err) return console.log(err);
-			console.log(argv.src + ' uploaded to ' + '/'+codes.bucket+'/'+argv.dest);
 
-			if (argv.ref) invalidate();
+			upload(result, content_type, true);
 		});
-	});
-} else if (argv.ref) invalidate();
-
-//$ node upload.js --codes=codes.json --dest=client.js --src=build/client.js --ref=client.js
+	} else {
+		upload(file, content_type, false);
+	}
+} else if (argv.ref) {
+	invalidate();
+}
