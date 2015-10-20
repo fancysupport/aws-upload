@@ -45,7 +45,7 @@ function upload(data, content_type, zipped) {
 	var s3 = new AWS.S3({accessKeyId: codes.s3_key, secretAccessKey: codes.s3_secret});
 
 	var opts = {
-		ACL: 'public-read-write',
+		ACL: 'public-read',
 		Bucket: codes.bucket,
 		Key: argv.dest,
 		Body: data,
